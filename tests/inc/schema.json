@@ -1,0 +1,66 @@
+{
+  "facets": {
+    "sensor": {
+      "facetAttributes": {
+        "sensor_id": {
+          "attributeDefinition": {
+            "attributeType": "STRING",
+            "isImmutable": true,
+            "attributeRules": {
+              "NameLengthRule": {
+                "parameters": {
+                  "min": "3",
+                  "max": "64"
+                },
+                "ruleType": "STRING_LENGTH"
+              }
+            }
+          },
+          "requiredBehavior": "REQUIRED_ALWAYS"
+        }
+      },
+      "objectType": "LEAF_NODE"
+    },
+    "policy": {
+      "facetAttributes": {},
+      "objectType": "POLICY"
+    },
+    "location": {
+      "facetAttributes": {
+        "location_name": {
+          "attributeDefinition": {
+            "attributeType": "STRING",
+            "isImmutable": true
+          },
+          "requiredBehavior": "REQUIRED_ALWAYS"
+        }
+      },
+      "objectType": "NODE"
+    },
+    "node": {
+      "facetAttributes": {},
+      "objectType": "NODE"
+    }
+  },
+  "typedLinkFacets": {
+    "sensor_floor_association": {
+      "facetAttributes": {
+        "sensor_type": {
+          "attributeDefinition": {
+            "attributeType": "STRING",
+            "isImmutable": true
+          },
+          "requiredBehavior": "REQUIRED_ALWAYS"
+        },
+        "maintenance_date": {
+          "attributeDefinition": {
+            "attributeType": "DATETIME",
+            "isImmutable": false
+          },
+          "requiredBehavior": "REQUIRED_ALWAYS"
+        }
+      },
+      "identityAttributeOrder": ["sensor_type", "maintenance_date"]
+    }
+  }
+}

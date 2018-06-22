@@ -1,0 +1,52 @@
+{
+  "name": "clouddirectory-client",
+  "version": "1.0.0",
+  "description": "JavaScript convenience wrapper for the AWS Cloud Directory API.",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel src --out-dir dist",
+    "prepublish": "npm run build",
+    "test": "jest -i --bail",
+    "flow": "flow"
+  },
+  "engines" : { "node" : ">=6.10" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emdgroup/clouddirectory-client.git"
+  },
+  "keywords": [
+    "aws",
+    "cloud directory"
+  ],
+  "author": "Moritz Onken <onken@netcubed.de>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/emdgroup/clouddirectory-client/issues"
+  },
+  "homepage": "https://github.com/emdgroup/clouddirectory-client#readme",
+  "peerDependencies": {
+    "aws-sdk": "^2.x.x"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.259.1",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-flow": "^6.23.0",
+    "documentation": "^8.0.0",
+    "flow-bin": "^0.75.0",
+    "jest": "^23.1.0"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageDirectory": "./coverage/",
+    "globalSetup": "<rootDir>/tests/inc/setup.js",
+    "globalTeardown": "<rootDir>/tests/inc/teardown.js",
+    "testMatch": [
+      "<rootDir>/tests/*.js"
+    ],
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ]
+  }
+}
