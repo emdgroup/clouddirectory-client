@@ -9,7 +9,9 @@
     "test": "jest -i --bail",
     "flow": "flow"
   },
-  "engines" : { "node" : ">=6.10" },
+  "engines": {
+    "node": ">=6.10"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/emdgroup/clouddirectory-client.git"
@@ -30,6 +32,7 @@
   "devDependencies": {
     "aws-sdk": "^2.259.1",
     "babel-cli": "^6.26.0",
+    "babel-jest": "^23.0.1",
     "babel-preset-env": "^1.7.0",
     "babel-preset-flow": "^6.23.0",
     "documentation": "^8.0.0",
