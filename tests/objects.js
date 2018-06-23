@@ -1,7 +1,9 @@
+import { randomBytes } from 'crypto';
+
 const CloudDirectoryClient = require('directory').default,
   IterableResultSet = require('resultset').default;
 
-let client, obj = {}, now = new Date(), DIRECTORY = process.__DIRECTORY__;
+let client, rand = randomBytes(6).toString('hex'), obj = {}, now = new Date(), DIRECTORY = process.__DIRECTORY__;
 
 beforeAll(() => client = new CloudDirectoryClient({
   DirectoryArn: DIRECTORY.DirectoryArn,
@@ -9,33 +11,39 @@ beforeAll(() => client = new CloudDirectoryClient({
   ConsistencyLevel: 'SERIALIZABLE',
 }));
 
+test('create rand root object', () => client.createObject({
+  Attributes: { node: null },
+  Parents: [{ ParentSelector: '/', LinkName: rand }],
+}).then(res => obj.root = `/${rand}`));
+
 test('create index', () => client.createIndex({
   IndexName: 'sensors',
-  ParentPath: '/',
+  ParentSelector: obj.root,
   IndexedAttributes: [{
     sensor: 'sensor_id',
   }],
 }).then(res => expect(res).toMatchObject({
-  IndexPath: '/sensors',
+  IndexPath: `/${rand}/sensors`,
+  IndexIdentifier: expect.stringMatching(/^[\w-_]+$/),
 })));
 
 test('create root floor with no attributes', () => client.createObject({
   Attributes: { node: null },
-  Parents: [{ ParentSelector: '/', LinkName: 'floors' }],
+  Parents: [{ ParentSelector: obj.root, LinkName: 'floors' }],
 }).then(res => (obj.floors = res.ObjectIdentifier) && expect(res).toMatchObject({
   ObjectIdentifier: expect.stringMatching(/^[\w-_]+$/),
 })));
 
 test('create ground floor with attributes', () => client.createObject({
   Attributes: { location: { location_name: 'Ground Floor' } },
-  Parents: [{ ParentSelector: '/floors', LinkName: 'ground_floor' }],
+  Parents: [{ ParentSelector: `/${rand}/floors`, LinkName: 'ground_floor' }],
 }).then(res => expect(res).toMatchObject({
   ObjectIdentifier: expect.stringMatching(/^[\w-_]+$/),
 })));
 
 test('attach sensor to floor and index', () => client.createObject({
-  Parents: [{ ParentSelector: '/floors/ground_floor', LinkName: 'mysensor' }],
-  Indexes: ['/sensors'],
+  Parents: [{ ParentSelector: `/${rand}/floors/ground_floor`, LinkName: 'mysensor' }],
+  Indexes: [`/${rand}/sensors`],
   Attributes: {
     sensor: { sensor_id: '1234' },
   }
@@ -44,7 +52,7 @@ test('attach sensor to floor and index', () => client.createObject({
 })));
 
 test('attach typed link to object', () => expect(client.attachTypedLink(
-  '/floors/ground_floor/mysensor', '/floors', {
+  `/${rand}/floors/ground_floor/mysensor`, `/${rand}/floors`, {
     sensor_floor_association: {
       maintenance_date: now,
       sensor_type: 'water',
@@ -54,7 +62,7 @@ test('attach typed link to object', () => expect(client.attachTypedLink(
 
 test('list incoming links to to floor', async () => {
   let links = await client.listIncomingTypedLinks(
-    '/floors', { sensor_floor_association: null },
+    `/${rand}/floors`, { sensor_floor_association: null },
   );
   expect(links).toBeInstanceOf(IterableResultSet);
   return expect(links.all()).resolves.toMatchObject([{
@@ -65,7 +73,7 @@ test('list incoming links to to floor', async () => {
 });
 
 test('detach typed link to object', async () => expect(client.detachTypedLink(
-  '/floors/ground_floor/mysensor', '/floors', {
+  `/${rand}/floors/ground_floor/mysensor`, `/${rand}/floors`, {
     sensor_floor_association: {
       maintenance_date: now,
       sensor_type: 'water',
