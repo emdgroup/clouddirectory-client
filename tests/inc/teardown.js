@@ -1,15 +1,11 @@
 const AWS = require('aws-sdk'),
-  client = new AWS.CloudDirectory(),
-  crypto = require('crypto');
+  client = new AWS.CloudDirectory();
 
-let rand = crypto.randomBytes(6).toString('hex');
-
-module.exports = async () => {
+module.exports = () => {
   let directory = process.__DIRECTORY__;
-  await client.disableDirectory({
+  return client.disableDirectory({
     DirectoryArn: directory.DirectoryArn,
-  }).promise();
-  return Promise.all([
+  }).promise().then(res => Promise.all([
     client.deleteDirectory({
       DirectoryArn: directory.DirectoryArn,
     }).promise(),
@@ -19,5 +15,5 @@ module.exports = async () => {
     client.deleteSchema({
       SchemaArn: directory.DevSchemaArn,
     }).promise(),
-  ]);
+  ]));
 };

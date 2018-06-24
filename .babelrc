@@ -4,25 +4,11 @@
     [
       "env",
       {
+        "useBuiltIns": true,
         "targets": {
           "node": "6.10"
         }
       }
     ]
-  ],
-  "env": {
-    "test": {
-      "presets": [
-        "flow",
-        [
-          "env",
-          {
-            "targets": {
-              "node": "6.10"
-            }
-          }
-        ]
-      ]
-    }
-  }
+  ]
 }

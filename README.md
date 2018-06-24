@@ -1,5 +1,5 @@
 [![Build Status](https://img.shields.io/travis/emdgroup/clouddirectory-client.svg?style=flat-square)](https://travis-ci.org/emdgroup/clouddirectory-client)
-![Codecov](https://img.shields.io/codecov/c/github/emdgroup/clouddirectory-client.svg?style=flat-square)
+[![Codecov](https://img.shields.io/codecov/c/github/emdgroup/clouddirectory-client.svg?style=flat-square)](https://codecov.io/github/emdgroup/clouddirectory-client)
 [![GitHub license](https://img.shields.io/github/license/emdgroup/clouddirectory-client.svg?style=flat-square)](https://github.com/emdgroup/clouddirectory-client/blob/master/LICENSE)
 [![sponsored by](https://img.shields.io/badge/sponsored%20by-emdgroup.com-ff55aa.svg?style=flat-square)](http://emdgroup.com)
 
