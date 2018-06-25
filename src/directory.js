@@ -38,10 +38,9 @@ export default class CloudDirectoryClient {
   }
 
   resultSetFactory(args: {}) {
-    return new IterableResultSet({
-      ...args,
+    return new IterableResultSet(Object.assign({
       client: this,
-    });
+    }, args));
   }
 
   listObjectChildrenWithAttributes(selector: Selector) {
