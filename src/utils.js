@@ -1,5 +1,3 @@
-import 'babel-polyfill';
-
 export let
   joinSelectors = (...selector) => {
     if (selector.length === 1) return selector[0];
