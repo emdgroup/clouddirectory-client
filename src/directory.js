@@ -2,7 +2,7 @@
 
 import CloudDirectory from 'aws-sdk/clients/clouddirectory';
 
-import { joinSelectors, flattenObjectAttributes, flattenLinkAttributes, inflateLinkAttributes } from './utils';
+import { joinSelectors, flattenObjectAttributes, flattenLinkAttributes, inflateLinkAttributes, deflateValue } from './utils';
 
 import IterableResultSet from './resultset';
 
@@ -69,9 +69,7 @@ export default class CloudDirectoryClient {
               SchemaArn: this.SchemaArn,
               Name: a,
             },
-            Value: {
-              StringValue: Attributes[facet][a],
-            },
+            Value: deflateValue(Attributes[facet][a]),
           })))
     );
     return this.cd.batchWrite({
@@ -245,12 +243,8 @@ export default class CloudDirectoryClient {
       Range: {
         StartMode: 'INCLUSIVE',
         EndMode: 'INCLUSIVE',
-        StartValue: {
-          StringValue: facet[facetName][attr],
-        },
-        EndValue: {
-          StringValue: facet[facetName][attr],
-        },
+        StartValue: deflateValue(facet[facetName][attr]),
+        EndValue: deflateValue(facet[facetName][attr]),
       }
     })) : undefined;
 

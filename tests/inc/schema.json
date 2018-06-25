@@ -17,6 +17,27 @@
             }
           },
           "requiredBehavior": "REQUIRED_ALWAYS"
+        },
+        "public_key": {
+          "attributeDefinition": {
+            "attributeType": "BINARY",
+            "isImmutable": true
+          },
+          "requiredBehavior": "NOT_REQUIRED"
+        },
+        "serial_number": {
+          "attributeDefinition": {
+            "attributeType": "NUMBER",
+            "isImmutable": true
+          },
+          "requiredBehavior": "NOT_REQUIRED"
+        },
+        "essential": {
+          "attributeDefinition": {
+            "attributeType": "BOOLEAN",
+            "isImmutable": true
+          },
+          "requiredBehavior": "NOT_REQUIRED"
         }
       },
       "objectType": "LEAF_NODE"

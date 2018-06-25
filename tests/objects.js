@@ -34,11 +34,18 @@ test('create ground floor with attributes', () => client.createObject({
   ObjectIdentifier: expect.stringMatching(/^[\w-_]+$/),
 })));
 
+let mysensorAttributes = {
+  sensor_id: '1234',
+  serial_number: 1,
+  public_key: Buffer.from('rsa-ssh something'),
+  essential: false,
+};
+
 test('attach sensor to floor and index', () => client.createObject({
   Parents: [{ ParentSelector: `/${rand}/floors/ground_floor`, LinkName: 'mysensor' }],
   Indexes: [`/${rand}/sensors`],
   Attributes: {
-    sensor: { sensor_id: '1234' },
+    sensor: mysensorAttributes,
   }
 }).then(res => (obj.mysensor = res.ObjectIdentifier) && expect(res).toMatchObject({
   ObjectIdentifier: expect.stringMatching(/^[\w-_]+$/),
@@ -57,7 +64,7 @@ test('list children with attributes', () => {
   let children = client.listObjectChildrenWithAttributes(`/${rand}/floors/ground_floor`);
   expect(children).toBeInstanceOf(IterableResultSet);
   return expect(children.all()).resolves.toMatchObject([{
-    Attributes: { sensor: { sensor_id: '1234' } },
+    Attributes: { sensor: mysensorAttributes },
     ObjectIdentifier: obj.mysensor,
     LinkName: 'mysensor',
   }]);

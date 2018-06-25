@@ -41,12 +41,15 @@ export let
     else if (value === true || value === false) return { BooleanValue: value };
     else if (value instanceof Date) return { DatetimeValue: value };
     else if (value instanceof Buffer) return { BinaryValue: value };
-    else if (!Number.isNaN(value)) return { NumberValue: value };
-    else throw 'Unknown type';
+    else if (typeof value === 'number') return { NumberValue: value.toString() };
+    else throw 'Unsupported type';
   },
 
-  inflateValue = value => {
-    return Object.values(value).find(v => v !== null);
+  inflateValue = obj => {
+    let type = Object.keys(obj).find(k => obj[k] !== null), value = obj[type];
+    if(type === 'NumberValue') return parseFloat(value);
+    else if(type === 'BinaryValue') return Buffer.from(value);
+    else return value;
   },
 
   camelCaseEncode = str => str.replace(/_\w/g, m => m[1].toUpperCase());
