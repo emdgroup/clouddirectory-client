@@ -79,6 +79,14 @@ The selector argument is ubiquitous and can take the following shape:
 
 ## Methods
 
+### attachObject
+
+**Returns** `null`
+
+```js
+client.attachObject(parentSelector, childSelector, linkName);
+```
+
 ### attachTypedLink
 
 **Returns** `null`
@@ -132,6 +140,14 @@ client.detachFromIndex(indexSelector, objectSelector);
 ```
 
 Detaches the specified object from the specified index.
+
+### detachObject
+
+**Returns** `null`
+
+```js
+client.detachObject(parentSelector, linkName);
+```
 
 ### listAttachedIndices
 

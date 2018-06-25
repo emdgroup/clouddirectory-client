@@ -207,7 +207,22 @@ export default class CloudDirectoryClient {
     }).promise().then(() => null);
   }
 
-  async detachObject() { }
+  async detachObject(parentSelector: Selector, linkName: string) {
+    return this.cd.detachObject({
+      DirectoryArn: this.Arn,
+      LinkName: linkName,
+      ParentReference: { Selector: parentSelector },
+    }).promise().then(() => null);
+  }
+
+  async attachObject(parentSelector: Selector, childSelector: Selector, linkName: string) {
+    return this.cd.detachObject({
+      DirectoryArn: this.Arn,
+      LinkName: linkName,
+      ParentReference: { Selector: parentSelector },
+      ChildReference: { Selector: childSelector },
+    }).promise().then(() => null);
+  }
 
   async detachPolicy() { }
 
