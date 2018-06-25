@@ -49,6 +49,11 @@ test('delete index with attached children fails', async () => {
   return expect(client.deleteIndex('/sensors')).rejects.toThrowError(/detach a node entirely from the tree prior to removing the node/);
 });
 
+test('detach one object manually', async () => {
+  await expect(client.detachFromIndex('/sensors', '/mysensor2')).resolves.toBeNull();
+  return expect(client.listIndex('/sensors').all()).resolves.toHaveLength(1);
+});
+
 test('detach children and delete index', async () => {
   await client.detachAllFromIndex('/sensors');
   return expect(client.deleteIndex('/sensors')).resolves.toBeNull();

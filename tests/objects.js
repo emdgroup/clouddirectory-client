@@ -79,9 +79,21 @@ test('attach typed link to object', () => expect(client.attachTypedLink(
   },
 )).resolves.toBeNull());
 
-test('list incoming links to to floor', async () => {
+test('list incoming links to floor', async () => {
   let links = await client.listIncomingTypedLinks(
     `/${rand}/floors`, { sensor_floor_association: null },
+  );
+  expect(links).toBeInstanceOf(IterableResultSet);
+  return expect(links.all()).resolves.toMatchObject([{
+    SourceObjectSelector: `$${obj.mysensor}`,
+    TargetObjectSelector: `$${obj.floors}`,
+    LinkAttributes: { sensor_type: 'water', maintenance_date: now },
+  }]);
+});
+
+test('list outgoing links from sensor', async () => {
+  let links = await client.listOutgoingTypedLinks(
+    `$${obj.mysensor}`, { sensor_floor_association: null },
   );
   expect(links).toBeInstanceOf(IterableResultSet);
   return expect(links.all()).resolves.toMatchObject([{

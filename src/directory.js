@@ -187,7 +187,7 @@ export default class CloudDirectoryClient {
       TargetReference: {
         Selector: targetSelector,
       },
-    }).promise();
+    }).promise().then(() => null);
   }
 
   async detachAllFromIndex(indexSelector: string) {
