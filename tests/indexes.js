@@ -1,24 +1,19 @@
-const CloudDirectoryClient = require('directory').default,
-  IterableResultSet = require('resultset').default;
+import { CloudDirectoryClient, IterableResultSet, buildClient } from './inc/lib';
 
-let client, DIRECTORY = process.__DIRECTORY__;
+let client;
 
-beforeAll(() => client = new CloudDirectoryClient({
-  DirectoryArn: DIRECTORY.DirectoryArn,
-  AppliedSchemaArn: DIRECTORY.AppliedSchemaArn,
-  ConsistencyLevel: 'SERIALIZABLE',
-}));
+beforeAll(() => client = buildClient());
 
-test('createIndex', () => client.createIndex({
+test('createIndex', () => expect(client.createIndex({
   IndexName: 'sensors',
   ParentPath: '/',
   IndexedAttributes: [{
     sensor: 'sensor_id',
   }],
-}).then(res => expect(res).toMatchObject({
+})).resolves.toMatchObject({
   IndexPath: '/sensors',
   IndexIdentifier: expect.stringMatching(/\w+/),
-})));
+}));
 
 test('listIndex of empty index', async () => {
   let res = client.listIndex('/sensors');

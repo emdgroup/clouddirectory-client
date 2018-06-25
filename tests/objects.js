@@ -1,15 +1,8 @@
-import { randomBytes } from 'crypto';
+import { IterableResultSet, buildClient, randomString } from './inc/lib';
 
-const CloudDirectoryClient = require('directory').default,
-  IterableResultSet = require('resultset').default;
+let client, rand = randomString(), obj = {}, now = new Date();
 
-let client, rand = randomBytes(6).toString('hex'), obj = {}, now = new Date(), DIRECTORY = process.__DIRECTORY__;
-
-beforeAll(() => client = new CloudDirectoryClient({
-  DirectoryArn: DIRECTORY.DirectoryArn,
-  AppliedSchemaArn: DIRECTORY.AppliedSchemaArn,
-  ConsistencyLevel: 'SERIALIZABLE',
-}));
+beforeAll(() => client = buildClient());
 
 test('create rand root object', () => client.createObject({
   Attributes: { node: null },

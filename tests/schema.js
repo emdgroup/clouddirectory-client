@@ -1,13 +1,8 @@
-const CloudDirectoryClient = require('directory').default,
-  IterableResultSet = require('resultset').default;
+import { buildClient } from './inc/lib';
 
-let client, DIRECTORY = process.__DIRECTORY__;
+let client;
 
-beforeAll(() => client = new CloudDirectoryClient({
-  DirectoryArn: DIRECTORY.DirectoryArn,
-  AppliedSchemaArn: DIRECTORY.AppliedSchemaArn,
-  ConsistencyLevel: 'SERIALIZABLE',
-}));
+beforeAll(() => client = buildClient());
 
 test('get schema as json', () => client.getSchemaAsJson().then(res => expect(res).toMatchObject({
   Document: expect.stringMatching(/sourceSchemaArn/),
