@@ -1,11 +1,17 @@
 export default class IterableResultSet {
-  constructor(client, method, args, childrenAttributeName, transformer = i => i) {
-    args = Object.assign({
+  constructor({
+    client,
+    method,
+    parametersOverride = {},
+    keyIsLinkName = true,
+    childrenAttributeName, transformer = i => i
+  }) {
+    let args = Object.assign({
       DirectoryArn: client.Arn,
       MaxResults: client.MaxResults,
       ConsistencyLevel: method === 'listObjectParentPaths' ? undefined : client.ConsistencyLevel,
-    }, args);
-    Object.assign(this, { inFlight: null, client, method, args, childrenAttributeName, transformer });
+    }, parametersOverride);
+    Object.assign(this, { inFlight: null, client, method, args, keyIsLinkName, childrenAttributeName, transformer });
   }
 
   addTransformation(transformer) {
@@ -22,8 +28,8 @@ export default class IterableResultSet {
       res.Children = Array.isArray(res[this.childrenAttributeName])
         ? res[this.childrenAttributeName]
         : Object.keys(res[this.childrenAttributeName]).map(k => ({
-          ObjectIdentifier: k,
-          LinkName: res[this.childrenAttributeName][k],
+          [this.keyIsLinkName ? 'LinkName' : 'ObjectIdentifier']: k,
+          [this.keyIsLinkName ? 'ObjectIdentifier' : 'LinkName']: res[this.childrenAttributeName][k],
         }));
       return res;
     }, err => {

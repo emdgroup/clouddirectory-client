@@ -44,6 +44,25 @@ test('attach sensor to floor and index', () => client.createObject({
   ObjectIdentifier: expect.stringMatching(/^[\w-_]+$/),
 })));
 
+test('list children', () => {
+  let children = client.listObjectChildren(`/${rand}/floors/ground_floor`);
+  expect(children).toBeInstanceOf(IterableResultSet);
+  return expect(children.all()).resolves.toMatchObject([{
+    ObjectIdentifier: obj.mysensor,
+    LinkName: 'mysensor',
+  }]);
+});
+
+test('list children with attributes', () => {
+  let children = client.listObjectChildrenWithAttributes(`/${rand}/floors/ground_floor`);
+  expect(children).toBeInstanceOf(IterableResultSet);
+  return expect(children.all()).resolves.toMatchObject([{
+    Attributes: { sensor: { sensor_id: '1234' } },
+    ObjectIdentifier: obj.mysensor,
+    LinkName: 'mysensor',
+  }]);
+});
+
 test('attach typed link to object', () => expect(client.attachTypedLink(
   `/${rand}/floors/ground_floor/mysensor`, `/${rand}/floors`, {
     sensor_floor_association: {

@@ -8,9 +8,11 @@ import IterableResultSet from './resultset';
 
 type Selector = string | Array<string>;
 
-type AttributeValues = { [facetName: string]: {
-  [attributeName: string]: string | Date | boolean | Buffer,
-} };
+type AttributeValues = {
+  [facetName: string]: {
+    [attributeName: string]: string | Date | boolean | Buffer,
+  }
+};
 type Parent = { ParentSelector: Selector, LinkName: string };
 
 export default class CloudDirectoryClient {
@@ -35,15 +37,18 @@ export default class CloudDirectoryClient {
     Object.assign(this, { MaxResults, ConsistencyLevel });
   }
 
-  resultSetFactory(...args: any) {
-    return new IterableResultSet(this, ...args);
+  resultSetFactory(args: {}) {
+    return new IterableResultSet({
+      ...args,
+      client: this,
+    });
   }
 
   listObjectChildrenWithAttributes(selector: Selector) {
     let resultset = this.listObjectChildren(selector);
-    resultset.addTransformation(({ LinkName, ObjectIdentifier }) => this._listObjectAttributes(selector, LinkName).all().then(res => ({
+    resultset.addTransformation(({ LinkName, ObjectIdentifier }) => this._listObjectAttributes(`$${ObjectIdentifier}`).all().then(res => ({
       ObjectIdentifier,
-      ObjectPath: joinSelectors(selector, LinkName),
+      LinkName: LinkName,
       Attributes: flattenObjectAttributes(res),
     })));
     return resultset;
@@ -317,7 +322,7 @@ const scrollableListOperations = {
   listObjectAttributes: { custom: true, childrenAttributeName: 'Attributes' }, // FacetFilter
   listObjectChildren: { childrenAttributeName: 'Children' },
   listObjectParentPaths: { childrenAttributeName: 'PathToObjectIdentifiersList' },
-  listObjectParents: { childrenAttributeName: 'Parents' },
+  listObjectParents: { childrenAttributeName: 'Parents', keyIsLinkName: false },
   listObjectPolicies: { childrenAttributeName: 'AttachedPolicyIds' },
   listOutgoingTypedLinks: { custom: true, childrenAttributeName: 'TypedLinkSpecifiers' }, // special filter syntax
   listPolicyAttachments: { childrenAttributeName: 'ObjectIdentifiers', referenceKey: 'PolicyReference' },
@@ -325,12 +330,15 @@ const scrollableListOperations = {
 };
 
 Object.keys(scrollableListOperations).forEach((fn: string) => {
-  let config = scrollableListOperations[fn];
-  CloudDirectoryClient.prototype[config.custom ? `_${fn}` : fn] = function (selector: Selector) {
-    return this.resultSetFactory(fn, {
-      [config.referenceKey || 'ObjectReference']: {
-        Selector: joinSelectors(selector)
-      }
-    }, config.childrenAttributeName);
+  let { custom, referenceKey, childrenAttributeName, keyIsLinkName = true } = scrollableListOperations[fn];
+  CloudDirectoryClient.prototype[custom ? `_${fn}` : fn] = function (selector: Selector) {
+    return this.resultSetFactory({
+      method: fn,
+      parametersOverride: {
+        [referenceKey || 'ObjectReference']: {
+          Selector: joinSelectors(selector)
+        },
+      }, keyIsLinkName, childrenAttributeName
+    });
   }
 });
