@@ -1,6 +1,8 @@
 export let
   joinSelectors = (...selector) => {
-    if (selector.length === 1) return selector[0];
+    if(selector.length === 1 && !Array.isArray(selector[0])) return selector[0];
+    selector = selector.map(s => Array.isArray(s) ? s : [s]);
+    selector = [].concat(...selector);
     return '/' + selector.map(a => a.replace(/^\//g, '').replace(/\/$/g, '')).filter(a => a.length).join('/');
   },
 
