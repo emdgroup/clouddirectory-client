@@ -16,7 +16,6 @@ test('create index', () => client.createIndex({
     sensor: 'sensor_id',
   }],
 }).then(res => expect(res).toMatchObject({
-  IndexPath: `/${rand}/sensors`,
   IndexIdentifier: expect.stringMatching(/^[\w-_]+$/),
 })));
 

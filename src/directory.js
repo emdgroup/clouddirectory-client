@@ -99,7 +99,7 @@ export default class CloudDirectoryClient {
       }))).concat(Indexes.map(index => ({
         AttachToIndex: {
           IndexReference: {
-            Selector: index,
+            Selector: joinSelectors(index),
           },
           TargetReference: {
             Selector: '#CreateObject',
@@ -168,8 +168,8 @@ export default class CloudDirectoryClient {
     let attributes = inflateLinkAttributes(facets);
     return this.cd.attachTypedLink({
       DirectoryArn: this.Arn,
-      SourceObjectReference: { Selector: sourceSelector },
-      TargetObjectReference: { Selector: targetSelector },
+      SourceObjectReference: { Selector: joinSelectors(sourceSelector) },
+      TargetObjectReference: { Selector: joinSelectors(targetSelector) },
       TypedLinkFacet: {
         SchemaArn: this.SchemaArn,
         TypedLinkName: Object.keys(facets)[0],
@@ -182,22 +182,35 @@ export default class CloudDirectoryClient {
     return this.cd.detachFromIndex({
       DirectoryArn: this.Arn,
       IndexReference: {
-        Selector: indexSelector,
+        Selector: joinSelectors(indexSelector),
       },
       TargetReference: {
-        Selector: targetSelector,
+        Selector: joinSelectors(targetSelector),
       },
     }).promise().then(() => null);
   }
 
-  async detachAllFromIndex(indexSelector: string) {
+
+  async attachToIndex(indexSelector: Selector, targetSelector: Selector) {
+    return this.cd.attachToIndex({
+      DirectoryArn: this.Arn,
+      IndexReference: {
+        Selector: joinSelectors(indexSelector),
+      },
+      TargetReference: {
+        Selector: joinSelectors(targetSelector),
+      },
+    }).promise().then(() => null);
+  }
+
+  async detachAllFromIndex(indexSelector: Selector) {
     let children = await this.listIndex(indexSelector).all();
     return this.cd.batchWrite({
       DirectoryArn: this.Arn,
       Operations: children.map(c => ({
         DetachFromIndex: {
           IndexReference: {
-            Selector: indexSelector,
+            Selector: joinSelectors(indexSelector),
           },
           TargetReference: {
             Selector: `$${c.ObjectIdentifier}`,
@@ -211,16 +224,16 @@ export default class CloudDirectoryClient {
     return this.cd.detachObject({
       DirectoryArn: this.Arn,
       LinkName: linkName,
-      ParentReference: { Selector: parentSelector },
+      ParentReference: { Selector: joinSelectors(parentSelector) },
     }).promise().then(() => null);
   }
 
   async attachObject(parentSelector: Selector, childSelector: Selector, linkName: string) {
-    return this.cd.detachObject({
+    return this.cd.attachObject({
       DirectoryArn: this.Arn,
       LinkName: linkName,
-      ParentReference: { Selector: parentSelector },
-      ChildReference: { Selector: childSelector },
+      ParentReference: { Selector: joinSelectors(parentSelector) },
+      ChildReference: { Selector: joinSelectors(childSelector) },
     }).promise().then(() => null);
   }
 
@@ -231,8 +244,8 @@ export default class CloudDirectoryClient {
     return this.cd.detachTypedLink({
       DirectoryArn: this.Arn,
       TypedLinkSpecifier: {
-        SourceObjectReference: { Selector: sourceSelector },
-        TargetObjectReference: { Selector: targetSelector },
+        SourceObjectReference: { Selector: joinSelectors(sourceSelector) },
+        TargetObjectReference: { Selector: joinSelectors(targetSelector) },
         TypedLinkFacet: {
           SchemaArn: this.SchemaArn,
           TypedLinkName: Object.keys(facets)[0],
@@ -294,11 +307,10 @@ export default class CloudDirectoryClient {
       })))),
       LinkName: IndexName,
       ParentReference: {
-        Selector: ParentSelector,
+        Selector: joinSelectors(ParentSelector),
       }
     }).promise().then(({ ObjectIdentifier }) => ({
       IndexIdentifier: ObjectIdentifier,
-      IndexPath: joinSelectors(ParentSelector, IndexName),
     }));
   }
 
@@ -344,7 +356,7 @@ Object.keys(scrollableListOperations).forEach((fn: string) => {
       method: fn,
       parametersOverride: {
         [referenceKey || 'ObjectReference']: {
-          Selector: joinSelectors(selector)
+          Selector: joinSelectors(selector),
         },
       }, keyIsLinkName, childrenAttributeName
     });

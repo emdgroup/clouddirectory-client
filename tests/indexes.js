@@ -11,7 +11,6 @@ test('createIndex', () => expect(client.createIndex({
     sensor: 'sensor_id',
   }],
 })).resolves.toMatchObject({
-  IndexPath: '/sensors',
   IndexIdentifier: expect.stringMatching(/\w+/),
 }));
 
@@ -51,6 +50,13 @@ test('delete index with attached children fails', async () => {
 
 test('detach one object manually', async () => {
   await expect(client.detachFromIndex('/sensors', '/mysensor2')).resolves.toBeNull();
+  return expect(client.listIndex('/sensors').all()).resolves.toHaveLength(1);
+});
+
+test('re-attach object, then delete object', async () => {
+  await expect(client.attachToIndex('/sensors', '/mysensor2')).resolves.toBeNull();
+  await expect(client.listIndex('/sensors').all()).resolves.toHaveLength(2);
+  await expect(client.deleteObject(['mysensor2'])).resolves.toBeNull();
   return expect(client.listIndex('/sensors').all()).resolves.toHaveLength(1);
 });
 
