@@ -43,9 +43,9 @@ export default class CloudDirectoryClient {
     }, args));
   }
 
-  listObjectChildrenWithAttributes(selector: Selector) {
+  listObjectChildrenWithAttributes(selector: Selector, facetName: String) {
     let resultset = this.listObjectChildren(selector);
-    resultset.addTransformation(({ LinkName, ObjectIdentifier }) => this._listObjectAttributes(`$${ObjectIdentifier}`).all().then(res => ({
+    resultset.addTransformation(({ LinkName, ObjectIdentifier }) => this.listObjectAttributes(`$${ObjectIdentifier}`, facetName).all().then(res => ({
       ObjectIdentifier,
       LinkName: LinkName,
       Attributes: flattenObjectAttributes(res),

@@ -34,21 +34,37 @@ test('create ground floor with attributes', () => client.createObject({
 })));
 
 let mysensorAttributes = {
-  sensor_id: '1234',
-  serial_number: 1,
-  public_key: Buffer.from('rsa-ssh something'),
-  essential: false,
+  sensor: {
+    sensor_id: '1234',
+    serial_number: 1,
+    essential: false,
+  },
+  thing: {
+    public_key: Buffer.from('rsa-ssh something'),
+  },
 };
 
 test('attach sensor to floor and index', () => client.createObject({
   Parents: [{ ParentSelector: `/${rand}/floors/ground_floor`, LinkName: 'mysensor' }],
   Indexes: [`/${rand}/sensors`],
-  Attributes: {
-    sensor: mysensorAttributes,
-  }
-}).then(res => (obj.mysensor = res.ObjectIdentifier) && expect(res).toMatchObject({
-  ObjectIdentifier: expect.stringMatching(/^[\w-_]+$/),
-})));
+  Attributes:  mysensorAttributes,
+}).then(async res => {
+  obj.mysensor = res.ObjectIdentifier;
+  await expect(res).toMatchObject({
+    ObjectIdentifier: expect.stringMatching(/^[\w-_]+$/),
+  });
+  return expect(client.getObjectInformation(`$${obj.mysensor}`)).resolves.toMatchObject({
+    ObjectIdentifier: obj.mysensor,
+    SchemaFacets: expect.arrayContaining([{
+      FacetName: 'sensor',
+      SchemaArn: expect.stringMatching(/^arn/),
+    }, {
+      FacetName: 'thing',
+      SchemaArn: expect.stringMatching(/^arn/),
+    }])
+  });
+}));
+
 
 test('list children', () => {
   let children = client.listObjectChildren(`/${rand}/floors/ground_floor`);
@@ -59,11 +75,19 @@ test('list children', () => {
   }]);
 });
 
-test('list children with attributes', () => {
+test('list children with attributes', async () => {
   let children = client.listObjectChildrenWithAttributes(`/${rand}/floors/ground_floor`);
   expect(children).toBeInstanceOf(IterableResultSet);
-  return expect(children.all()).resolves.toMatchObject([{
-    Attributes: { sensor: mysensorAttributes },
+  await expect(children.all()).resolves.toMatchObject([{
+    Attributes: mysensorAttributes,
+    ObjectIdentifier: obj.mysensor,
+    LinkName: 'mysensor',
+  }]);
+
+  let things = client.listObjectChildrenWithAttributes(`/${rand}/floors/ground_floor`, 'thing');
+  expect(things).toBeInstanceOf(IterableResultSet);
+  await expect(things.all()).resolves.toMatchObject([{
+    Attributes: { thing: mysensorAttributes.thing },
     ObjectIdentifier: obj.mysensor,
     LinkName: 'mysensor',
   }]);
@@ -83,11 +107,17 @@ test('list incoming links to floor', async () => {
     `/${rand}/floors`, { sensor_floor_association: null },
   );
   expect(links).toBeInstanceOf(IterableResultSet);
-  return expect(links.all()).resolves.toMatchObject([{
+  await expect(links.all()).resolves.toMatchObject([{
     SourceObjectSelector: `$${obj.mysensor}`,
     TargetObjectSelector: `$${obj.floors}`,
     LinkAttributes: { sensor_type: 'water', maintenance_date: now },
   }]);
+
+  let filtered = await client.listIncomingTypedLinks(
+    `/${rand}/floors`, { sensor_floor_association: { sensor_type: 'oxygen' } },
+  );
+  expect(filtered).toBeInstanceOf(IterableResultSet);
+  return expect(filtered.all()).resolves.toHaveLength(0);
 });
 
 test('list outgoing links from sensor', async () => {
