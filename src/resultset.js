@@ -1,3 +1,5 @@
+const HAS_NO_CONSISTENCY_LEVEL = ['listObjectParentPaths', 'lookupPolicy'];
+
 export default class IterableResultSet {
   constructor({
     client,
@@ -9,8 +11,7 @@ export default class IterableResultSet {
     let args = Object.assign({
       DirectoryArn: client.Arn,
       MaxResults: client.MaxResults,
-      ConsistencyLevel: method === 'listObjectParentPaths' ? undefined : client.ConsistencyLevel,
-    }, parametersOverride);
+    }, HAS_NO_CONSISTENCY_LEVEL.includes(method) ? {} : { ConsistencyLevel: client.ConsistencyLevel }, parametersOverride);
     Object.assign(this, { inFlight: null, client, method, args, keyIsLinkName, childrenAttributeName, transformer });
   }
 
@@ -48,7 +49,7 @@ export default class IterableResultSet {
         yield this.request(nextToken).then(res => {
           nextToken = res.NextToken || null;
           cache.push.apply(cache, res.Children);
-          if(!cache.length) return;
+          if (!cache.length) return;
           return transformer ? transformer(cache.shift()) : cache.shift();
         });
       } else {
