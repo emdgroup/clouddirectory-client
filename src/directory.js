@@ -231,7 +231,21 @@ export default class CloudDirectoryClient {
     }).promise().then(() => null);
   }
 
-  async detachPolicy() { }
+  async detachPolicy(policySelector: Selector, objectSelector: Selector) {
+    return this.cd.detachPolicy({
+      DirectoryArn: this.Arn,
+      ObjectReference: { Selector: objectSelector },
+      PolicyReference: { Selector: policySelector },
+    }).promise().then(() => null);
+  }
+
+  async attachPolicy(policySelector: Selector, objectSelector: Selector) {
+    return this.cd.attachPolicy({
+      DirectoryArn: this.Arn,
+      ObjectReference: { Selector: objectSelector },
+      PolicyReference: { Selector: policySelector },
+    }).promise().then(() => null);
+  }
 
   async detachTypedLink(sourceSelector: Selector, targetSelector: Selector, facets: AttributeValues) {
     let attributes = inflateLinkAttributes(facets);
