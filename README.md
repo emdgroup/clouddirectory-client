@@ -46,7 +46,7 @@ client.createObject({
 
 let sensors = client.listIncomingTypedLinks('/floors/ground_floor', {
   FloorSensorAssociation: { sensor_type: 'water' }
-});
+}).iterate();
 for (let sensor of sensors) {
   console.log(await sensor);
 }
@@ -81,7 +81,7 @@ The selector argument is ubiquitous and can take the following shape:
 
 ### attachObject
 
-**Returns** `null`
+**Resolves to** `null`
 
 ```js
 client.attachObject(parentSelector, childSelector, linkName);
@@ -89,7 +89,7 @@ client.attachObject(parentSelector, childSelector, linkName);
 
 ### attachTypedLink
 
-**Returns** `null`
+**Resolves to** `null`
 
 ```js
 client.attachTypedLink(sourceSelector, targetSelector, {
@@ -103,7 +103,7 @@ client.attachTypedLink(sourceSelector, targetSelector, {
 
 ### deleteIndex
 
-**Returns** `null`
+**Resolves to** `null`
 
 ```js
 client.deleteIndex(selector);
@@ -113,7 +113,7 @@ client.deleteIndex(selector);
 
 ### deleteObject
 
-**Returns** `null`
+**Resolves to** `null`
 
 ```js
 client.deleteObject(selector);
@@ -123,7 +123,7 @@ client.deleteObject(selector);
 
 ### detachAllFromIndex
 
-**Returns** `null`
+**Resolves to** `null`
 
 ```js
 client.detachAllFromIndex(indexSelector);
@@ -133,7 +133,7 @@ Detaches all objects from the specified index.
 
 ### detachFromIndex
 
-**Returns** `null`
+**Resolves to** `null`
 
 ```js
 client.detachFromIndex(indexSelector, objectSelector);
@@ -143,7 +143,7 @@ Detaches the specified object from the specified index.
 
 ### detachObject
 
-**Returns** `null`
+**Resolves to** `null`
 
 ```js
 client.detachObject(parentSelector, linkName);
@@ -226,7 +226,7 @@ client.listIncomingTypedLinks(selector, facetName?);
 `IterableResultSet` is returned by all `list*` and `lookup*` methods. It's a convenience wrapper for the paging API provided by AWS Cloud Directory. Instead of having to page through results this class provides a iterable result set.
 
 ```js
-let users = client.listObjectChildren('/users');
+let users = client.listObjectChildren('/users').iterate();
 for(let user of users) {
   console.log(await user);
 }
