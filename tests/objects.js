@@ -6,7 +6,7 @@ beforeAll(() => client = buildClient());
 
 test('create rand root object', () => client.createObject({
   Attributes: { node: null },
-  Parents: [{ ParentSelector: '/', LinkName: rand }],
+  Parents: [{ Selector: '/', LinkName: rand }],
 }).then(res => obj.root = `/${rand}`));
 
 test('create index', () => client.createIndex({
@@ -21,14 +21,14 @@ test('create index', () => client.createIndex({
 
 test('create root floor with no attributes', () => client.createObject({
   Attributes: { node: null },
-  Parents: [{ ParentSelector: obj.root, LinkName: 'floors' }],
+  Parents: [{ Selector: obj.root, LinkName: 'floors' }],
 }).then(res => (obj.floors = res.ObjectIdentifier) && expect(res).toMatchObject({
   ObjectIdentifier: expect.stringMatching(/^[\w-_]+$/),
 })));
 
 test('create ground floor with attributes', () => client.createObject({
   Attributes: { location: { location_name: 'Ground Floor' } },
-  Parents: [{ ParentSelector: `/${rand}/floors`, LinkName: 'ground_floor' }],
+  Parents: [{ Selector: `/${rand}/floors`, LinkName: 'ground_floor' }],
 }).then(res => expect(res).toMatchObject({
   ObjectIdentifier: expect.stringMatching(/^[\w-_]+$/),
 })));
@@ -45,7 +45,7 @@ let mysensorAttributes = {
 };
 
 test('attach sensor to floor and index', () => client.createObject({
-  Parents: [{ ParentSelector: `/${rand}/floors/ground_floor`, LinkName: 'mysensor' }],
+  Parents: [{ Selector: `/${rand}/floors/ground_floor`, LinkName: 'mysensor' }],
   Indexes: [`/${rand}/sensors`],
   Attributes:  mysensorAttributes,
 }).then(async res => {

@@ -13,7 +13,7 @@ type AttributeValues = {
     [attributeName: string]: string | Date | boolean | Buffer,
   }
 };
-type Parent = { ParentSelector: Selector, LinkName: string };
+type Parent = { Selector: Selector, LinkName: string };
 
 export default class CloudDirectoryClient {
   Arn: string;
@@ -81,10 +81,10 @@ export default class CloudDirectoryClient {
           })),
           ObjectAttributeList: objAttrs.length ? objAttrs : [],
         }
-      }].concat(Parents.map(({ ParentSelector = '/', LinkName }) => ({
+      }].concat(Parents.map(({ Selector = '/', LinkName }) => ({
         AttachObject: {
           ParentReference: {
-            Selector: joinSelectors(ParentSelector),
+            Selector: joinSelectors(Selector),
           },
           LinkName: LinkName,
           ChildReference: {

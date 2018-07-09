@@ -30,7 +30,7 @@ client.createObject({
   },
 }, {
   Parents: [{
-    ParentObjectSelector: '/floors/ground_floor/server_room',
+    Selector: '/floors/ground_floor/server_room',
     LinkName: 'abc123123',
   }],
   Indexes: ['/sensors'],
