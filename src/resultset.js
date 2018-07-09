@@ -39,7 +39,7 @@ export default class IterableResultSet {
     return this.inFlight;
   }
 
-  *scroll() {
+  *iterate() {
     let cache = [], nextToken, { transformer } = this;
     while (true) {
       if (cache.length) {
@@ -48,6 +48,7 @@ export default class IterableResultSet {
         yield this.request(nextToken).then(res => {
           nextToken = res.NextToken || null;
           cache.push.apply(cache, res.Children);
+          if(!cache.length) return;
           return transformer ? transformer(cache.shift()) : cache.shift();
         });
       } else {
@@ -58,7 +59,7 @@ export default class IterableResultSet {
 
   async all() {
     let tmp = [], results = [];
-    for (let res of this.scroll()) {
+    for (let res of this.iterate()) {
       results.push(await res);
       // tmp.push(res);
       // if(tmp.length > this.args.MaxResults) {

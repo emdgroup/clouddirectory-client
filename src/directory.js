@@ -2,7 +2,7 @@
 
 import CloudDirectory from 'aws-sdk/clients/clouddirectory';
 
-import { joinSelectors, flattenObjectAttributes, flattenLinkAttributes, inflateLinkAttributes, deflateValue } from './utils';
+import { joinSelectors, flattenObjectAttributes, flattenLinkAttributes, inflateLinkAttributes, deflateValue, buildAttributeFilter } from './utils';
 
 import IterableResultSet from './resultset';
 
@@ -58,18 +58,17 @@ export default class CloudDirectoryClient {
     Attributes: AttributeValues,
     Indexes: Array<string>,
   }) {
-    let objAttrs = Array.prototype.concat.apply([],
-      Object.keys(Attributes)
-        .filter(facet => !!Attributes[facet])
-        .map(facet => Object.keys(Attributes[facet])
-          .map(a => ({
-            Key: {
-              FacetName: facet,
-              SchemaArn: this.SchemaArn,
-              Name: a,
-            },
-            Value: deflateValue(Attributes[facet][a]),
-          })))
+    let objAttrs = [].concat.apply([], Object.keys(Attributes)
+      .filter(facet => !!Attributes[facet])
+      .map(facet => Object.keys(Attributes[facet])
+        .map(a => ({
+          Key: {
+            FacetName: facet,
+            SchemaArn: this.SchemaArn,
+            Name: a,
+          },
+          Value: deflateValue(Attributes[facet][a]),
+        })))
     );
     return this.cd.batchWrite({
       DirectoryArn: this.Arn,
@@ -80,11 +79,7 @@ export default class CloudDirectoryClient {
             FacetName: facet,
             SchemaArn: this.SchemaArn,
           })),
-          // ParentReference: {
-          //   Selector: parentSelector,
-          // },
           ObjectAttributeList: objAttrs.length ? objAttrs : [],
-          // LinkName: linkName, // [^\/\[\]\(\):\{\}#@!?\s\\;]+
         }
       }].concat(Parents.map(({ ParentSelector = '/', LinkName }) => ({
         AttachObject: {
@@ -107,7 +102,6 @@ export default class CloudDirectoryClient {
         }
       })))
     }).promise().then(({ Responses }) => ({
-      // ObjectPath: joinSelectors(parentSelector, linkName),
       ObjectIdentifier: Responses[0].CreateObject.ObjectIdentifier,
     }));
   }
@@ -265,18 +259,9 @@ export default class CloudDirectoryClient {
 
   _listTypedLinks(type: string, selector: Selector, facet: AttributeValues) {
     let facetName = Object.keys(facet)[0];
-    let attributes = facet[facetName] ? Object.keys(facet[facetName]).map(attr => ({
-      AttributeName: attr,
-      Range: {
-        StartMode: 'INCLUSIVE',
-        EndMode: 'INCLUSIVE',
-        StartValue: deflateValue(facet[facetName][attr]),
-        EndValue: deflateValue(facet[facetName][attr]),
-      }
-    })) : undefined;
+    let attributes = facet[facetName] ? Object.keys(facet[facetName]).map(attr => buildAttributeFilter(attr, facet[facetName][attr])) : undefined;
 
-    let resultset = this['_' + type](selector, facet);
-    Object.assign(resultset.args, {
+    let resultset = this['_' + type](selector, {
       FilterTypedLink: {
         SchemaArn: this.SchemaArn,
         TypedLinkName: facetName,
@@ -333,32 +318,61 @@ export default class CloudDirectoryClient {
   // _listOutgoingTypedLinks: function;
   // listPolicyAttachments: function;
   // lookupPolicy: function;
+
+  listIndex(selector: Selector, attributes: AttributeValues = {}) {
+    let facets = Object.keys(attributes);
+    let filter = facets.map(FacetName => Object.keys(attributes[FacetName]).map(attr => ({
+      AttributeKey: {
+        FacetName,
+        Name: attr,
+        SchemaArn: this.SchemaArn,
+      },
+      Range: {
+        StartMode: 'INCLUSIVE',
+        EndMode: 'INCLUSIVE',
+        StartValue: deflateValue(attributes[FacetName][attr]),
+        EndValue: deflateValue(attributes[FacetName][attr]),
+      }
+    })));
+    return this._listIndex(selector, facets.length ? {
+      RangesOnIndexedValues: [].concat.apply([], filter),
+    } : {});
+  }
+
+  listObjectAttributes(Selector: Selector, FacetName: String) {
+    return this._listObjectAttributes(Selector, FacetName ? {
+      FacetFilter: {
+        FacetName,
+        SchemaArn: this.SchemaArn,
+      },
+    } : {});
+  }
 }
 
 const scrollableListOperations = {
   listAttachedIndices: { childrenAttributeName: 'IndexAttachments', referenceKey: 'TargetReference' },
   listIncomingTypedLinks: { custom: true, childrenAttributeName: 'LinkSpecifiers' },
-  listIndex: { custom: false, childrenAttributeName: 'IndexAttachments', referenceKey: 'IndexReference' }, // RangesOnIndexedValues
-  listObjectAttributes: { custom: true, childrenAttributeName: 'Attributes' }, // FacetFilter
+  listIndex: { custom: true, childrenAttributeName: 'IndexAttachments', referenceKey: 'IndexReference' },
+  listObjectAttributes: { custom: true, childrenAttributeName: 'Attributes' },
   listObjectChildren: { childrenAttributeName: 'Children' },
   listObjectParentPaths: { childrenAttributeName: 'PathToObjectIdentifiersList' },
   listObjectParents: { childrenAttributeName: 'Parents', keyIsLinkName: false },
   listObjectPolicies: { childrenAttributeName: 'AttachedPolicyIds' },
-  listOutgoingTypedLinks: { custom: true, childrenAttributeName: 'TypedLinkSpecifiers' }, // special filter syntax
+  listOutgoingTypedLinks: { custom: true, childrenAttributeName: 'TypedLinkSpecifiers' },
   listPolicyAttachments: { childrenAttributeName: 'ObjectIdentifiers', referenceKey: 'PolicyReference' },
   lookupPolicy: { childrenAttributeName: 'PolicyToPathList' },
 };
 
 Object.keys(scrollableListOperations).forEach((fn: string) => {
   let { custom, referenceKey, childrenAttributeName, keyIsLinkName = true } = scrollableListOperations[fn];
-  CloudDirectoryClient.prototype[custom ? `_${fn}` : fn] = function (selector: Selector) {
+  CloudDirectoryClient.prototype[custom ? `_${fn}` : fn] = function (selector: Selector, parametersOverride = {}) {
     return this.resultSetFactory({
       method: fn,
-      parametersOverride: {
+      parametersOverride: Object.assign({
         [referenceKey || 'ObjectReference']: {
           Selector: joinSelectors(selector),
         },
-      }, keyIsLinkName, childrenAttributeName
+      }, parametersOverride), keyIsLinkName, childrenAttributeName
     });
   }
 });

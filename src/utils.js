@@ -52,4 +52,16 @@ export let
     else return value;
   },
 
+  buildAttributeFilter = (attr, value) => {
+    return {
+      AttributeName: attr,
+      Range: {
+        StartMode: 'INCLUSIVE',
+        EndMode: 'INCLUSIVE',
+        StartValue: deflateValue(value),
+        EndValue: deflateValue(value),
+      }
+    };
+  },
+
   camelCaseEncode = str => str.replace(/_\w/g, m => m[1].toUpperCase());
