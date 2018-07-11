@@ -53,7 +53,7 @@ test('attach sensor to floor and index', () => client.createObject({
   await expect(res).toMatchObject({
     ObjectIdentifier: expect.stringMatching(/^[\w-_]+$/),
   });
-  return expect(client.getObjectInformation(`$${obj.mysensor}`)).resolves.toMatchObject({
+  await expect(client.getObjectInformation(`$${obj.mysensor}`)).resolves.toMatchObject({
     ObjectIdentifier: obj.mysensor,
     SchemaFacets: expect.arrayContaining([{
       FacetName: 'sensor',
@@ -63,6 +63,8 @@ test('attach sensor to floor and index', () => client.createObject({
       SchemaArn: expect.stringMatching(/^arn/),
     }])
   });
+
+  return expect(client.listAllObjectAttributes(`$${obj.mysensor}`)).resolves.toMatchObject(mysensorAttributes);
 }));
 
 

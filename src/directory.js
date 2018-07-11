@@ -45,10 +45,10 @@ export default class CloudDirectoryClient {
 
   listObjectChildrenWithAttributes(selector: Selector, facetName: String) {
     let resultset = this.listObjectChildren(selector);
-    resultset.addTransformation(({ LinkName, ObjectIdentifier }) => this.listObjectAttributes(`$${ObjectIdentifier}`, facetName).all().then(res => ({
+    resultset.addTransformation(({ LinkName, ObjectIdentifier }) => this.listAllObjectAttributes(`$${ObjectIdentifier}`, facetName).then(res => ({
       ObjectIdentifier,
       LinkName: LinkName,
-      Attributes: flattenObjectAttributes(res),
+      Attributes: res,
     })));
     return resultset;
   }
@@ -290,7 +290,7 @@ export default class CloudDirectoryClient {
     return resultset;
   }
 
-  async createIndex({ IsUnique = true, IndexedAttributes = [], IndexName, ParentSelector = '/' }: {
+  async createIndex({ IsUnique = true, IndexedAttributes = [], IndexName, ParentSelector }: {
     IsUnique: boolean,
     IndexedAttributes: Array<{ [string]: { [string]: string } }>,
     IndexName: string,
@@ -306,14 +306,12 @@ export default class CloudDirectoryClient {
       })))),
       LinkName: IndexName,
       ParentReference: {
-        Selector: joinSelectors(ParentSelector),
+        Selector: joinSelectors(ParentSelector || '/'),
       }
     }).promise().then(({ ObjectIdentifier }) => ({
       IndexIdentifier: ObjectIdentifier,
     }));
   }
-
-
 
   async getSchemaAsJson() {
     return this.cd.getSchemaAsJson({
@@ -360,6 +358,10 @@ export default class CloudDirectoryClient {
         SchemaArn: this.SchemaArn,
       },
     } : {});
+  }
+
+  listAllObjectAttributes(Selector: Selector, FacetName: String) {
+    return this.listObjectAttributes(Selector, FacetName).all().then(flattenObjectAttributes);
   }
 }
 
