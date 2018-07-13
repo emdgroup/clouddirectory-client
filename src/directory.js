@@ -53,6 +53,16 @@ export default class CloudDirectoryClient {
     return resultset;
   }
 
+  listObjectParentsWithAttributes(selector: Selector, facetName: String) {
+    let resultset = this.listObjectParents(selector);
+    resultset.addTransformation(({ LinkName, ObjectIdentifier }) => this.listAllObjectAttributes(`$${ObjectIdentifier}`, facetName).then(res => ({
+      ObjectIdentifier,
+      LinkName: LinkName,
+      Attributes: res,
+    })));
+    return resultset;
+  }
+
   async createObject({ Parents = [], Attributes = {}, Indexes = [] }: {
     Parents: Array<Parent>,
     Attributes: AttributeValues,
