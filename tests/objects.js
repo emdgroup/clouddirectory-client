@@ -47,7 +47,7 @@ let mysensorAttributes = {
 test('attach sensor to floor and index', () => client.createObject({
   Parents: [{ Selector: `/${rand}/floors/ground_floor`, LinkName: 'mysensor' }],
   Indexes: [`/${rand}/sensors`],
-  Attributes:  mysensorAttributes,
+  Attributes: mysensorAttributes,
 }).then(async res => {
   obj.mysensor = res.ObjectIdentifier;
   await expect(res).toMatchObject({
@@ -134,7 +134,7 @@ test('list outgoing links from sensor', async () => {
   }]);
 });
 
-test('detach typed link to object', async () => expect(client.detachTypedLink(
+test('detach typed link to object', () => expect(client.detachTypedLink(
   `/${rand}/floors/ground_floor/mysensor`, `/${rand}/floors`, {
     sensor_floor_association: {
       maintenance_date: now,
@@ -142,3 +142,26 @@ test('detach typed link to object', async () => expect(client.detachTypedLink(
     }
   }
 )).resolves.toBeNull());
+
+test('create object with typed link without parents', async () => {
+  await expect(client.createObject({
+    Attributes: { thing: { public_key: Buffer.from('rsa-ssh something') } },
+    OutgoingTypedLinks: [{
+      Selector: `/${rand}/floors`, Attributes: {
+        sensor_floor_association: { sensor_type: 'thing', maintenance_date: now },
+      }
+    }],
+  })).resolves.toMatchObject({
+    ObjectIdentifier: expect.stringMatching(/^[\w-_]+$/),
+  });
+  const links = await client.listIncomingTypedLinks(`/${rand}/floors`, { sensor_floor_association: null }).all();
+  expect(links).toHaveLength(1);
+  await client.detachTypedLink(links[0].SourceObjectSelector, `/${rand}/floors`, {
+    sensor_floor_association: { sensor_type: 'thing', maintenance_date: now },
+  });
+
+  return expect(
+    client.listIncomingTypedLinks(`/${rand}/floors`, { sensor_floor_association: null }).all()
+  ).resolves.toHaveLength(0);
+
+});

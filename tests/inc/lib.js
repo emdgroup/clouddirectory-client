@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 
-export const CloudDirectoryClient = require('directory').default,
-  IterableResultSet = require('resultset').default,
+export const CloudDirectoryClient = require('index'),
+  IterableResultSet = require('resultset'),
   DIRECTORY = process.__DIRECTORY__;
 
 export function buildClient() {

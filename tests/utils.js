@@ -7,7 +7,8 @@ test('deflate value with unsupported type', () => {
 test.each([
   [[['selector']], '/selector'],
   [['selector'], 'selector'],
-  [['/', 'selector'], '/selector']
+  [['/', 'selector'], '/selector'],
+  [['$AQH8uiqsxntJxZjGq6c4'], '$AQH8uiqsxntJxZjGq6c4']
 
 ])('joinSelector', (a, b) => {
   expect(joinSelectors(...a)).toEqual(b);

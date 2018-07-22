@@ -63,11 +63,17 @@ export default class CloudDirectoryClient {
     return resultset;
   }
 
-  async createObject({ Parents = [], Attributes = {}, Indexes = [] }: {
-    Parents: Array<Parent>,
-    Attributes: AttributeValues,
-    Indexes: Array<string>,
-  }) {
+  async createObject({
+    Parents = [],
+    Attributes = {},
+    Indexes = [],
+    OutgoingTypedLinks = [],
+    IncomingTypedLinks = [],
+  }: {
+      Parents: Array<Parent>,
+      Attributes: AttributeValues,
+      Indexes: Array<string>,
+    }) {
     let objAttrs = [].concat.apply([], Object.keys(Attributes)
       .filter(facet => !!Attributes[facet])
       .map(facet => Object.keys(Attributes[facet])
@@ -110,7 +116,33 @@ export default class CloudDirectoryClient {
             Selector: '#CreateObject',
           }
         }
-      })))
+      }))).concat(OutgoingTypedLinks.map(({ Selector, Attributes }) => {
+        const attrs = inflateLinkAttributes(Attributes);
+        return {
+          AttachTypedLink: {
+            SourceObjectReference: { Selector: '#CreateObject' },
+            TargetObjectReference: { Selector: joinSelectors(Selector) },
+            TypedLinkFacet: {
+              SchemaArn: this.SchemaArn,
+              TypedLinkName: Object.keys(Attributes)[0],
+            },
+            Attributes: attrs.length ? attrs : [],
+          }
+        };
+      })).concat(IncomingTypedLinks.map(({ Selector, Attributes }) => {
+        const attrs = inflateLinkAttributes(Attributes);
+        return {
+          AttachTypedLink: {
+            SourceObjectReference: { Selector: joinSelectors(Selector) },
+            TargetObjectReference: { Selector: '#CreateObject' },
+            TypedLinkFacet: {
+              SchemaArn: this.SchemaArn,
+              TypedLinkName: Object.keys(Attributes)[0],
+            },
+            Attributes: attrs.length ? attrs : [],
+          }
+        };
+      })),
     }).promise().then(({ Responses }) => ({
       ObjectIdentifier: Responses[0].CreateObject.ObjectIdentifier,
     }));
