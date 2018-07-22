@@ -15,7 +15,7 @@ export default class IterableResultSet {
     Object.assign(this, { inFlight: null, client, method, args, keyIsLinkName, childrenAttributeName, transformer });
   }
 
-  addTransformation(transformer) {
+  addTransformation(transformer: Function) {
     let fn = this.transformer;
     this.transformer = i => transformer(fn(i));
   }
