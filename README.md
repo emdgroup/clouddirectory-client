@@ -16,7 +16,7 @@ const CloudDirectoryClient = require('clouddirectory-client');
 
 let client = new CloudDirectoryClient({
   DirectoryArn: '',
-  SchemaArn: '',
+  Schema: 'myschema/1', // schema name / major version
 });
 
 let index = await client.createIndex({
@@ -25,21 +25,21 @@ let index = await client.createIndex({
 });
 
 client.createObject({
-  sensor: {
-    sensor_id: 'abc123123',
+  Attributes: {
+    sensor: { sensor_id: 'abc123123' },
   },
-}, {
   Parents: [{
     Selector: '/floors/ground_floor/server_room',
     LinkName: 'abc123123',
   }],
   Indexes: ['/sensors'],
-  TypedLinks: [{
-    TargetObjectSelector: '/floors/ground_floor',
-    TypedLinkName: 'sensor_floor_association',
+  IncomingTypedLinks: [{
+    Selector: '/floors/ground_floor',
     Attributes: {
-      sensor_type: 'water',
-      maintenance_date: '2015-04-03',
+      sensor_floor_association: {
+        sensor_type: 'water',
+        maintenance_date: '2015-04-03',
+      },
     },
   }],
 });
@@ -75,7 +75,7 @@ The selector argument is ubiquitous and can take the following shape:
 
 * **Path** `/path/to/my/object`
 * **Object Identifier** `$AQFnK8iyN7pMTbkTyChgMF7N8WyQmgMnRLS4yPVJfYRDQA`
-* **List of Paths** `['path', 'to', 'object']` (the leading slash is optional)
+* **List of Path Segments** `['path', 'to', 'object']` (the leading slash is optional)
 
 ## Methods
 
