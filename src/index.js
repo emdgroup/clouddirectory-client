@@ -73,6 +73,8 @@ export default class CloudDirectoryClient {
       Parents: Array<Parent>,
       Attributes: AttributeValues,
       Indexes: Array<string>,
+      OutgoingTypedLinks: Array<AttributeValues>,
+      IncomingTypedLinks: Array<AttributeValues>,
     }) {
     let objAttrs = [].concat.apply([], Object.keys(Attributes)
       .filter(facet => !!Attributes[facet])
@@ -317,7 +319,7 @@ export default class CloudDirectoryClient {
     let facetName = Object.keys(facet)[0];
     let attributes = facet[facetName] ? Object.keys(facet[facetName]).map(attr => buildAttributeFilter(attr, facet[facetName][attr])) : undefined;
 
-    let resultset = this['_' + type](selector, {
+    let resultset = this[`_${type}`](selector, {
       FilterTypedLink: {
         SchemaArn: this.SchemaArn,
         TypedLinkName: facetName,
@@ -361,17 +363,17 @@ export default class CloudDirectoryClient {
     }).promise();
   }
 
-  // listAttachedIndices: function;
-  // _listIncomingTypedLinks: function;
-  // listIndex: function;
-  // _listObjectAttributes: function;
-  // listObjectChildren: function;
-  // listObjectParentPaths: function;
-  // listObjectParents: function;
-  // listObjectPolicies: function;
-  // _listOutgoingTypedLinks: function;
-  // listPolicyAttachments: function;
-  // lookupPolicy: function;
+  listAttachedIndices(selector: Selector, overrides: any) : IterableResultSet {}
+  _listIncomingTypedLinks(selector: Selector, overrides: any) : IterableResultSet {}
+  _listIndex(selector: Selector, overrides: any) : IterableResultSet {}
+  _listObjectAttributes(selector: Selector, overrides: any) : IterableResultSet {}
+  listObjectChildren(selector: Selector, overrides: any) : IterableResultSet {}
+  listObjectParentPaths(selector: Selector, overrides: any) : IterableResultSet {}
+  listObjectParents(selector: Selector, overrides: any) : IterableResultSet {}
+  listObjectPolicies(selector: Selector, overrides: any) : IterableResultSet {}
+  _listOutgoingTypedLinks(selector: Selector, overrides: any) : IterableResultSet {}
+  listPolicyAttachments(selector: Selector, overrides: any) : IterableResultSet {}
+  lookupPolicy(selector: Selector, overrides: any) : IterableResultSet {}
 
   listIndex(selector: Selector, attributes: AttributeValues = {}) {
     let facets = Object.keys(attributes);
