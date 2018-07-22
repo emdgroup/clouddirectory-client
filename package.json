@@ -2,7 +2,7 @@
   "name": "clouddirectory-client",
   "version": "1.0.0",
   "description": "JavaScript convenience wrapper for the AWS Cloud Directory API.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "babel src --out-dir dist",
     "prepublishOnly": "npm run build",
@@ -12,6 +12,7 @@
   "engines": {
     "node": ">=6.10"
   },
+  "files": ["dist/*"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/emdgroup/clouddirectory-client.git"
@@ -34,6 +35,7 @@
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-jest": "^23.0.1",
+    "babel-plugin-add-module-exports": "^0.3.2",
     "babel-preset-env": "^1.7.0",
     "babel-preset-flow": "^6.23.0",
     "documentation": "^8.0.0",
