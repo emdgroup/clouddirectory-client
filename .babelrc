@@ -10,5 +10,6 @@
         }
       }
     ]
-  ]
+  ],
+  "plugins": ["add-module-exports"]
 }
