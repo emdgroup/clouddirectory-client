@@ -1,6 +1,6 @@
 {
   "name": "clouddirectory-client",
-  "version": "0.1.1-1",
+  "version": "0.1.1-2",
   "description": "JavaScript convenience wrapper for the AWS Cloud Directory API.",
   "main": "dist/index.js",
   "scripts": {
