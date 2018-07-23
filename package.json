@@ -1,6 +1,6 @@
 {
   "name": "clouddirectory-client",
-  "version": "0.1.0",
+  "version": "0.1.1-0",
   "description": "JavaScript convenience wrapper for the AWS Cloud Directory API.",
   "main": "dist/index.js",
   "scripts": {
@@ -12,7 +12,9 @@
   "engines": {
     "node": ">=6.10"
   },
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/emdgroup/clouddirectory-client.git"
