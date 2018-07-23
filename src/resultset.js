@@ -44,7 +44,7 @@ export default class IterableResultSet {
     let cache = [], nextToken, { transformer } = this;
     while (true) {
       if (cache.length) {
-        yield Promise.resolve(cache.shift());
+        yield Promise.resolve(transformer ? transformer(cache.shift()) : cache.shift());
       } else if (nextToken !== null) {
         yield this.request(nextToken).then(res => {
           nextToken = res.NextToken || null;
