@@ -100,9 +100,25 @@ test('attach typed link to object', () => expect(client.attachTypedLink(
     sensor_floor_association: {
       maintenance_date: now,
       sensor_type: 'water',
+      optional: 'foobar',
     }
   },
 )).resolves.toBeNull());
+
+
+test('get optional link attributes', () => expect(client.getLinkAttributes(
+  `/${rand}/floors/ground_floor/mysensor`, `/${rand}/floors`, {
+    sensor_floor_association: {
+      maintenance_date: now,
+      sensor_type: 'water',
+    },
+  },
+  ['optional'],
+)).resolves.toMatchObject({
+  maintenance_date: now,
+  sensor_type: 'water',
+  optional: 'foobar',
+}));
 
 test('list incoming links to floor', async () => {
   let links = await client.listIncomingTypedLinks(

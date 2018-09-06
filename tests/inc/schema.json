@@ -84,6 +84,13 @@
             "isImmutable": false
           },
           "requiredBehavior": "REQUIRED_ALWAYS"
+        },
+        "optional": {
+          "attributeDefinition": {
+            "attributeType": "STRING",
+            "isImmutable": false
+          },
+          "requiredBehavior": "NOT_REQUIRED"
         }
       },
       "identityAttributeOrder": ["sensor_type", "maintenance_date"]

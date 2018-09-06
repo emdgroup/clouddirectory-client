@@ -291,6 +291,24 @@ export default class CloudDirectoryClient {
     }).promise().then(() => null);
   }
 
+  async getLinkAttributes(sourceSelector: Selector, targetSelector: Selector, facets: AttributeValues, names: Array<string>) {
+    let attributes = inflateLinkAttributes(facets);
+    let facet = Object.keys(facets)[0];
+    return this.cd.getLinkAttributes({
+      DirectoryArn: this.Arn,
+      AttributeNames: names,
+      TypedLinkSpecifier: {
+        SourceObjectReference: { Selector: joinSelectors(sourceSelector) },
+        TargetObjectReference: { Selector: joinSelectors(targetSelector) },
+        TypedLinkFacet: {
+          SchemaArn: this.SchemaArn,
+          TypedLinkName: facet,
+        },
+        IdentityAttributeValues: attributes.length ? attributes : [],
+      },
+    }).promise().then(res => Object.assign({}, facets[facet], flattenObjectAttributes(res.Attributes)[facet]));
+  }
+
   async detachTypedLink(sourceSelector: Selector, targetSelector: Selector, facets: AttributeValues) {
     let attributes = inflateLinkAttributes(facets);
     return this.cd.detachTypedLink({

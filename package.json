@@ -45,10 +45,11 @@
     "jest": "^23.4.2"
   },
   "jest": {
+    "testEnvironment": "node",
     "collectCoverage": true,
     "coverageDirectory": "./coverage/",
-    // "globalSetup": "<rootDir>/tests/inc/setup.js",
-    // "globalTeardown": "<rootDir>/tests/inc/teardown.js",
+    "globalSetup": "<rootDir>/tests/inc/setup.js",
+    "globalTeardown": "<rootDir>/tests/inc/teardown.js",
     "testMatch": [
       "<rootDir>/tests/*.js"
     ],
